@@ -34,6 +34,9 @@ router.post('/', contractController.createContract);
 app.get('/test', (req, res) => {
   res.send('Server is working!');
 });
+app.get('/', (req, res) => {
+  res.send('Welcome to the Contract Management System!');
+});
 
 // WebSocket connection
 io.on('connection', (socket) => {
@@ -41,6 +44,17 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('A user disconnected');
   });
+});
+app.get('/contracts', async (req, res) => {
+  try {
+    console.log('Connecting to database...');
+    const result = await pool.query('SELECT * FROM contracts');
+    console.log('Query successful:', result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching contracts:', err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // REST API to update contract and trigger WebSocket
@@ -72,7 +86,7 @@ app.put('/contracts/:id', async (req, res) => {
 });
 
 // Start server
-const PORT = 5002;
+const PORT = 5003;
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
